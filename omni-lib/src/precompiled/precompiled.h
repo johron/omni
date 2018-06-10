@@ -16,5 +16,3 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "../utilities/uncopyable.h"
-
-#include "linmath.h"

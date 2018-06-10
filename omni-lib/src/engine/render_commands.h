@@ -52,44 +52,81 @@ namespace omni {
 			const GLuint m_program;
 		};
 
-		/*
 		struct uniform_data {
-			struct visitor {
-				visitor(GLint location)
-					: m_location(location) { }
+			struct set_uniform {
+				template <typename Location>
+				set_uniform(const Location& location)
+					: m_location(std::visit(get_location(), location)) { }
 
 				template <typename T>
-				void operator()(T&& data) { static_assert(false, && "Unknown type"); }
+				void operator()(const T& data) { static_assert(false, && "Unknown type"); }
 
-				template <>
-				void operator()(const glm::mat4& data) { 
-					glUniformMatrix4fv(m_location, 1, GL_FALSE, glm::value_ptr(data)); 
-				}
+				template <> void operator()(const GLint& data) { glUniform1i(m_location, data); }
+				template <> void operator()(const glm::mat4& data) { glUniformMatrix4fv(m_location, 1, GL_FALSE, glm::value_ptr(data)); }
 
 				const GLint m_location;
 			};
 
-			using data = std::variant<
-				GLint, glm::mat4>;
+			using data_holder = std::variant<
+				GLint, 
+				glm::mat4>;
+
+			struct static_location { 
+				static_location(GLint location)
+					: m_location(location) { }
+
+				GLint get() const { return m_location; }
+
+				const GLint m_location;
+			};
+
+			struct program_location { 
+				program_location(GLint program, std::string_view name)
+					: m_program(program)
+					, m_name(name) { }
+
+				GLint get() const { return glGetUniformLocation(m_program, m_name.c_str()); }
+
+				const GLint m_program;
+				const std::string m_name;
+			};
+
+			using location_holder = std::variant<
+				static_location,
+				program_location>;
+
+			struct get_location {
+				template <typename T>
+				GLint operator()(const T& data) {
+					return data.get();
+				}
+			};
 
 			template <typename T>
-			uniform_data(GLuint program, T&& data) { }
+			uniform_data(GLuint location, T&& data)
+				: m_data(std::forward<T>(data)) 
+				, m_location(std::in_place_type_t<static_location>{}, location) { }
+
+			template <typename T>
+			uniform_data(GLint program, std::string_view name, T&& data)
+				: m_data(std::forward<T>(data))
+				, m_location(std::in_place_type_t<program_location>{}, program, name) { }
+
 
 			void apply() {
-				std::visit(visitor(m_location), m_data);
+				std::visit(set_uniform(m_location), m_data);
 			}
 
-			GLint m_location;
-			data m_data;
+			data_holder m_data;
+			location_holder m_location;
 		};
-		*/
 	}
 
 	using render_command = std::variant<
 		commands::viewport, 
 		commands::clear,
 		commands::clear_color,
-		//commands::uniform_data,
+		commands::uniform_data,
 		commands::use_program>;
 
 	struct command_runner {

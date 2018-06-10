@@ -1,7 +1,6 @@
 #include <thread>
 #include "omni-lib/src/omni.h"
 #include "omni-lib/src/engine/render_commands.h"
-#include <utility>
 
 static const char* vertex_shader_text =
 "uniform mat4 MVP;\n"
@@ -76,8 +75,8 @@ int main(int argc, char** argv) {
 		const auto mvp = projection * view * model;
 
 		commands.emplace_back<omni::commands::use_program>(program.m_id);
+		commands.emplace_back<omni::commands::uniform_data>(program.m_id, "MVP", mvp);
 		commands.visit(omni::command_runner());
-		glUniformMatrix4fv(mvp_location, 1, GL_FALSE, glm::value_ptr(mvp));
 		glDrawArrays(GL_TRIANGLES, 0, 3);
 
 

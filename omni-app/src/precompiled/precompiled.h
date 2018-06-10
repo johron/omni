@@ -2,4 +2,6 @@
 
 #include "omni-lib/src/precompiled/precompiled.h"
 
-#include "linmath.h"
+#include "glm/gtc/matrix_transform.hpp"
+#include "GLFW/glfw3.h"
+#include "glm/gtc/type_ptr.hpp"
