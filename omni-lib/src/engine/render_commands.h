@@ -133,6 +133,22 @@ namespace omni {
 			const GLint m_first;
 			const GLsizei m_count;
 		};
+
+		struct vertex_attrib_ptr {
+			vertex_attrib_ptr(GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid* pointer)
+				: m_index(index), m_size(size), m_type(type), m_normalized(normalized), m_stride(stride), m_pointer(pointer) { }
+
+			void apply() {
+				glVertexAttribPointer(m_index, m_size, m_type, m_normalized, m_stride, m_pointer);
+			}
+
+			const GLuint m_index;
+			const GLint m_size;
+			const GLenum m_type;
+			const GLboolean m_normalized;
+			const GLsizei m_stride;
+			const GLvoid* m_pointer;
+		};
 	}
 
 	using render_command = std::variant<
@@ -142,6 +158,15 @@ namespace omni {
 		commands::draw_arrays,
 		commands::uniform_data,
 		commands::use_program>;
+
+	template <typename Command>
+	struct immediate_command {
+		template <typename... Args>
+		immediate_command(Args&&... args) {
+			Command cmd(std::forward<Args>(args)...);
+			cmd.apply();
+		}
+	};
 
 	struct command_runner {
 		template <typename T>

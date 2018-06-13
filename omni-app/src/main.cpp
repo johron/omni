@@ -49,10 +49,10 @@ int main(int argc, char** argv) {
 	const auto vcol_location = glGetAttribLocation(program.m_id, "vCol");
 
 	glEnableVertexAttribArray(vpos_location);
-	glVertexAttribPointer(vpos_location, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (void*)0);
+	omni::immediate_command<omni::commands::vertex_attrib_ptr>(vpos_location, 2, GL_FLOAT, GL_FALSE, static_cast<GLsizei>(sizeof(float) * 5), (void*)0);
 	
 	glEnableVertexAttribArray(vcol_location);
-	glVertexAttribPointer(vcol_location, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (void*)(sizeof(float) * 2));
+	omni::immediate_command<omni::commands::vertex_attrib_ptr>(vcol_location, 3, GL_FLOAT, GL_FALSE, static_cast<GLsizei>(sizeof(float) * 5), (void*)(sizeof(float) * 2));
 
 
 	omni::command_list<omni::render_command> commands;
