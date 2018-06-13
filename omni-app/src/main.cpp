@@ -43,8 +43,6 @@ int main(int argc, char** argv) {
 
 	omni::vertex_buffer v_buffer(data);
 
-
-	const auto mvp_location = glGetUniformLocation(program.m_id, "MVP");
 	const auto vpos_location = glGetAttribLocation(program.m_id, "vPos");
 	const auto vcol_location = glGetAttribLocation(program.m_id, "vCol");
 

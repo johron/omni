@@ -2,6 +2,43 @@
 
 namespace omni {
 	namespace commands {
+		namespace util {
+			struct uniform_location {
+				uniform_location(GLint program, std::string_view name)
+					: m_program(program), m_name(name) { }
+
+				GLint get() const { return glGetUniformLocation(m_program, m_name.c_str()); }
+
+				const GLint m_program;
+				const std::string m_name;
+			};
+
+			struct attribute_location {
+				attribute_location(GLint program, std::string_view name)
+					: m_program(program), m_name(name) { }
+
+				GLint get() const { return glGetAttribLocation(m_program, m_name.c_str()); }
+
+				const GLint m_program;
+				const std::string m_name;
+			};
+
+			struct fixed_location {
+				fixed_location(GLint location)
+					: m_location(location) { }
+
+				GLint get() const { return m_location; }
+				const GLint m_location;
+			};
+
+			struct get_location {
+				template <typename T>
+				GLint operator()(const T& data) {
+					return data.get();
+				}
+			};
+		}
+
 		struct viewport {
 			viewport(GLint x, GLint y, GLsizei width, GLsizei height)
 				: m_x(x), m_y(y), m_width(width), m_height(height) { }
@@ -53,10 +90,10 @@ namespace omni {
 		};
 
 		struct uniform_data {
-			struct set_uniform {
+			struct set_uniform_data {
 				template <typename Location>
-				set_uniform(const Location& location)
-					: m_location(std::visit(get_location(), location)) { }
+				set_uniform_data(const Location& location)
+					: m_location(std::visit(util::get_location(), location)) { }
 
 				template <typename T>
 				void operator()(const T& data) { static_assert(false, && "Unknown type"); }
@@ -68,53 +105,26 @@ namespace omni {
 			};
 
 			using data_holder = std::variant<
-				GLint, 
+				GLint,
 				glm::mat4>;
 
-			struct static_location { 
-				static_location(GLint location)
-					: m_location(location) { }
-
-				GLint get() const { return m_location; }
-
-				const GLint m_location;
-			};
-
-			struct program_location { 
-				program_location(GLint program, std::string_view name)
-					: m_program(program)
-					, m_name(name) { }
-
-				GLint get() const { return glGetUniformLocation(m_program, m_name.c_str()); }
-
-				const GLint m_program;
-				const std::string m_name;
-			};
-
 			using location_holder = std::variant<
-				static_location,
-				program_location>;
-
-			struct get_location {
-				template <typename T>
-				GLint operator()(const T& data) {
-					return data.get();
-				}
-			};
+				util::fixed_location, 
+				util::uniform_location>;
 
 			template <typename T>
 			uniform_data(GLuint location, T&& data)
-				: m_data(std::forward<T>(data)) 
-				, m_location(std::in_place_type_t<static_location>{}, location) { }
+				: m_data(std::forward<T>(data))
+				, m_location(std::in_place_type_t<util::fixed_location>{}, location) { }
 
 			template <typename T>
 			uniform_data(GLint program, std::string_view name, T&& data)
 				: m_data(std::forward<T>(data))
-				, m_location(std::in_place_type_t<program_location>{}, program, name) { }
+				, m_location(std::in_place_type_t<util::uniform_location>{}, program, name) { }
 
 
 			void apply() {
-				std::visit(set_uniform(m_location), m_data);
+				std::visit(set_uniform_data(m_location), m_data);
 			}
 
 			data_holder m_data;
@@ -122,9 +132,9 @@ namespace omni {
 		};
 
 		struct draw_arrays {
-			draw_arrays(GLenum mode, GLint first, GLsizei count) 
+			draw_arrays(GLenum mode, GLint first, GLsizei count)
 				: m_mode(mode), m_first(first), m_count(count) { }
-			
+
 			void apply() {
 				glDrawArrays(m_mode, m_first, m_count);
 			}
@@ -152,7 +162,7 @@ namespace omni {
 	}
 
 	using render_command = std::variant<
-		commands::viewport, 
+		commands::viewport,
 		commands::clear,
 		commands::clear_color,
 		commands::draw_arrays,
