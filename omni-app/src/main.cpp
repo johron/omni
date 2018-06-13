@@ -76,8 +76,8 @@ int main(int argc, char** argv) {
 
 		commands.emplace_back<omni::commands::use_program>(program.m_id);
 		commands.emplace_back<omni::commands::uniform_data>(program.m_id, "MVP", mvp);
+		commands.emplace_back<omni::commands::draw_arrays>(GL_TRIANGLES, 0, 3);
 		commands.visit(omni::command_runner());
-		glDrawArrays(GL_TRIANGLES, 0, 3);
 
 
 		window.swap_buffers();

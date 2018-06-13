@@ -120,12 +120,26 @@ namespace omni {
 			data_holder m_data;
 			location_holder m_location;
 		};
+
+		struct draw_arrays {
+			draw_arrays(GLenum mode, GLint first, GLsizei count) 
+				: m_mode(mode), m_first(first), m_count(count) { }
+			
+			void apply() {
+				glDrawArrays(m_mode, m_first, m_count);
+			}
+
+			const GLenum m_mode;
+			const GLint m_first;
+			const GLsizei m_count;
+		};
 	}
 
 	using render_command = std::variant<
 		commands::viewport, 
 		commands::clear,
 		commands::clear_color,
+		commands::draw_arrays,
 		commands::uniform_data,
 		commands::use_program>;
 
