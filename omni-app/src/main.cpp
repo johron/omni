@@ -43,14 +43,11 @@ int main(int argc, char** argv) {
 
 	omni::vertex_buffer v_buffer(data);
 
-	const auto vpos_location = glGetAttribLocation(program.m_id, "vPos");
-	const auto vcol_location = glGetAttribLocation(program.m_id, "vCol");
+	omni::immediate_command<omni::commands::enable_vertex_attrib_array>(program.m_id, "vPos");
+	omni::immediate_command<omni::commands::vertex_attrib_ptr>(program.m_id, "vPos", 2, GL_FLOAT, GL_FALSE, static_cast<GLsizei>(sizeof(float) * 5), (void*)0);
 
-	glEnableVertexAttribArray(vpos_location);
-	omni::immediate_command<omni::commands::vertex_attrib_ptr>(vpos_location, 2, GL_FLOAT, GL_FALSE, static_cast<GLsizei>(sizeof(float) * 5), (void*)0);
-	
-	glEnableVertexAttribArray(vcol_location);
-	omni::immediate_command<omni::commands::vertex_attrib_ptr>(vcol_location, 3, GL_FLOAT, GL_FALSE, static_cast<GLsizei>(sizeof(float) * 5), (void*)(sizeof(float) * 2));
+	omni::immediate_command<omni::commands::enable_vertex_attrib_array>(program.m_id, "vCol");
+	omni::immediate_command<omni::commands::vertex_attrib_ptr>(program.m_id, "vCol", 3, GL_FLOAT, GL_FALSE, static_cast<GLsizei>(sizeof(float) * 5), (void*)(sizeof(float) * 2));
 
 
 	omni::command_list<omni::render_command> commands;

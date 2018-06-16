@@ -104,13 +104,8 @@ namespace omni {
 				const GLint m_location;
 			};
 
-			using data_holder = std::variant<
-				GLint,
-				glm::mat4>;
-
-			using location_holder = std::variant<
-				util::fixed_location, 
-				util::uniform_location>;
+			using data_holder = std::variant<GLint, glm::mat4>;
+			using location_holder = std::variant<util::fixed_location, util::uniform_location>;
 
 			template <typename T>
 			uniform_data(GLuint location, T&& data)
@@ -145,29 +140,97 @@ namespace omni {
 		};
 
 		struct vertex_attrib_ptr {
+			using location_holder = std::variant<util::fixed_location, util::attribute_location>;
+
 			vertex_attrib_ptr(GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid* pointer)
-				: m_index(index), m_size(size), m_type(type), m_normalized(normalized), m_stride(stride), m_pointer(pointer) { }
+				: m_location(std::in_place_type_t<util::fixed_location>{}, index)
+				, m_size(size), m_type(type), m_normalized(normalized), m_stride(stride), m_pointer(pointer) { }
+
+			vertex_attrib_ptr(GLint program, std::string_view name, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid* pointer)
+				: m_location(std::in_place_type_t<util::attribute_location>{}, program, name)
+				, m_size(size), m_type(type), m_normalized(normalized), m_stride(stride), m_pointer(pointer) { }
 
 			void apply() {
-				glVertexAttribPointer(m_index, m_size, m_type, m_normalized, m_stride, m_pointer);
+				glVertexAttribPointer(std::visit(util::get_location(), m_location), m_size, m_type, m_normalized, m_stride, m_pointer);
 			}
 
-			const GLuint m_index;
+			const location_holder m_location;
 			const GLint m_size;
 			const GLenum m_type;
 			const GLboolean m_normalized;
 			const GLsizei m_stride;
 			const GLvoid* m_pointer;
 		};
+
+		struct enable_vertex_attrib_array {
+			using location_holder = std::variant<util::fixed_location, util::attribute_location>;
+			enable_vertex_attrib_array(GLuint index)
+				: m_location(std::in_place_type_t<util::fixed_location>{}, index) { }
+
+			enable_vertex_attrib_array(GLint program, std::string_view name)
+				: m_location(std::in_place_type_t<util::attribute_location>{}, program, name) { }
+
+			void apply() {
+				glEnableVertexAttribArray(std::visit(util::get_location(), m_location));
+			}
+
+			const location_holder m_location;
+		};
+
+		struct disable_vertex_attrib_array {
+			using location_holder = std::variant<util::fixed_location, util::attribute_location>;
+			disable_vertex_attrib_array(GLuint index)
+				: m_location(std::in_place_type_t<util::fixed_location>{}, index) { }
+
+			disable_vertex_attrib_array(GLint program, std::string_view name)
+				: m_location(std::in_place_type_t<util::attribute_location>{}, program, name) { }
+
+			void apply() {
+				glDisableVertexAttribArray(std::visit(util::get_location(), m_location));
+			}
+
+			const location_holder m_location;
+		};
+
+		struct buffer_data {
+			buffer_data(GLenum target, GLsizeiptr size, const GLvoid* data, GLenum usage)
+				: m_target(target), m_size(size), m_data(data), m_usage(usage) { }
+
+			void apply() {
+				glBufferData(m_target, m_size, m_data, m_usage);
+			}
+
+			const GLenum m_target;
+			const GLsizeiptr m_size;
+			const GLvoid* m_data;
+			const GLenum m_usage;
+		};
+
+		struct bind_buffer {
+			bind_buffer(GLenum target, GLuint buffer)
+				: m_target(target), m_buffer(buffer) { }
+
+			void apply() {
+				glBindBuffer(m_target, m_buffer);
+			}
+
+			const GLenum m_target;
+			const GLuint m_buffer;
+		};
 	}
 
 	using render_command = std::variant<
 		commands::viewport,
+		commands::bind_buffer, 
+		commands::buffer_data,
 		commands::clear,
 		commands::clear_color,
 		commands::draw_arrays,
 		commands::uniform_data,
-		commands::use_program>;
+		commands::use_program,
+		commands::vertex_attrib_ptr,
+		commands::enable_vertex_attrib_array,
+		commands::disable_vertex_attrib_array>;
 
 	template <typename Command>
 	struct immediate_command {

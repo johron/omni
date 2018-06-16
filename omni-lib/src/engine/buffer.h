@@ -1,4 +1,5 @@
 #pragma once
+#include "render_commands.h"
 
 namespace omni {
 	template <int TYPE>
@@ -7,8 +8,8 @@ namespace omni {
 		template <typename T>
 		buffer(const T& data)
 			: m_id(generateBuffer()) {
-			glBindBuffer(TYPE, m_id);
-			glBufferData(TYPE, sizeof(data), data, GL_STATIC_DRAW);
+			immediate_command<commands::bind_buffer>(TYPE, m_id);
+			immediate_command<commands::buffer_data>(TYPE, sizeof(data), data, GL_STATIC_DRAW);
 		}
 
 		const GLuint m_id;
