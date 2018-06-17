@@ -5,7 +5,7 @@ set(src_precompiled
 
 set(src_engine
 	"src/engine/application.cpp"
-	"src/engine/engine.cpp"
+	"src/engine/render_engine.cpp"
 	"src/engine/updater.cpp"
 	"src/engine/window.cpp")
 

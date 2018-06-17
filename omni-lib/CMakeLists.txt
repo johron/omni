@@ -8,9 +8,10 @@ set(src_utilities
 
 set(src_engine
 	"src/engine/buffer.h"
-	"src/engine/engine.cpp"
-	"src/engine/engine.h"
+	"src/engine/render_engine.cpp"
+	"src/engine/render_engine.h"
 	"src/engine/render_commands.h"
+	"src/engine/render_thread.h"
 	"src/engine/shader.h"
 	"src/engine/shader_program.h"
 	"src/engine/window.cpp"

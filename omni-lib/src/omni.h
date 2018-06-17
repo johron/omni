@@ -4,7 +4,7 @@
 
 #include "utilities/uncopyable.h"
 
-#include "engine/engine.h"
+#include "engine/render_engine.h"
 #include "engine/window.h"
 #include "engine/shader.h"
 #include "engine/shader_program.h"

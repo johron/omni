@@ -20,7 +20,7 @@ static const char* fragment_shader_text =
 "}\n";
 
 int main(int argc, char** argv) {
-	omni::engine engine;
+	omni::render_engine engine;
 	omni::window window(800, 600, "sample window");
 
 	omni::vertex_shader v_shader(vertex_shader_text);
@@ -54,12 +54,11 @@ int main(int argc, char** argv) {
 	commands.reserve(128);
 
 	while (!window.should_close()) {
-		engine.process_events();
+		engine.command_queue().clear();
 
- 		commands.clear();
-		commands.emplace_back<omni::commands::viewport>(0, 0, 800, 600);
-		commands.emplace_back<omni::commands::clear_color>(0.2f, 0.03f, 0.3f, 1.0f);
- 		commands.emplace_back<omni::commands::clear>(GL_COLOR_BUFFER_BIT);
+		engine.command_queue().emplace_back<omni::commands::viewport>(0, 0, 800, 600);
+		engine.command_queue().emplace_back<omni::commands::clear_color>(0.2f, 0.03f, 0.3f, 1.0f);
+ 		engine.command_queue().emplace_back<omni::commands::clear>(GL_COLOR_BUFFER_BIT);
 
 		float ratio(800/600);
 
@@ -69,10 +68,11 @@ int main(int argc, char** argv) {
 
 		const auto mvp = projection * view * model;
 
-		commands.emplace_back<omni::commands::use_program>(program.m_id);
-		commands.emplace_back<omni::commands::uniform_data>(program.m_id, "MVP", mvp);
-		commands.emplace_back<omni::commands::draw_arrays>(GL_TRIANGLES, 0, 3);
-		commands.visit(omni::command_runner());
+		engine.command_queue().emplace_back<omni::commands::use_program>(program.m_id);
+		engine.command_queue().emplace_back<omni::commands::uniform_data>(program.m_id, "MVP", mvp);
+		engine.command_queue().emplace_back<omni::commands::draw_arrays>(GL_TRIANGLES, 0, 3);
+		engine.process_commands();
+		engine.process_events();
 
 
 		window.swap_buffers();

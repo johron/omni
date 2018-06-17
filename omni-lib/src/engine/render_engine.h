@@ -1,31 +1,29 @@
 #pragma once
-
-namespace {
-	void error_callback(int error, const char* description) {
-		throw std::runtime_error(std::to_string(error) + ":" + description);
-	}
-}
+#include <thread>
+#include "window.h"
+#include <atomic>
+#include "render_commands.h"
 
 namespace omni {
 	class render_engine : public util::uncopyable {
 	public:
-		render_engine() {
-			glfwSetErrorCallback(&error_callback);
+		render_engine();
+		~render_engine();
 
-			if (!glfwInit()) {
-				throw std::runtime_error("Failed to initialize glfw");
-			}
-		}
+		void process_events();
+		void process_commands();
 
-		~render_engine() {
-			glfwTerminate();
-		}
-
-		void process_events() {
-			glfwPollEvents();
-		}
+		using render_commands = command_list<render_command>;
+		render_commands& command_queue();
 
 	private:
+		void render_callback();
+
 		std::thread m_render_thread;
+		std::atomic<bool> m_render_thread_active;
+
+		render_commands m_current_list;
+		render_commands m_process_list;
+
 	};
 }
