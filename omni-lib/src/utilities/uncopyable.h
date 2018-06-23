@@ -1,14 +1,14 @@
 #pragma once
 
-namespace omni {
-	namespace util {
-		class uncopyable {
-		public:
-			uncopyable() = default;
-			virtual ~uncopyable() = default;
+namespace util {
+	class uncopyable {
+	public:
+		uncopyable() = default;
+		uncopyable(const uncopyable& other) = delete;
+		uncopyable(uncopyable&& other) = delete;
+		virtual ~uncopyable() = default;
 
-			uncopyable(const uncopyable& other) = delete;
-			uncopyable& operator=(const uncopyable& other) = delete;
-		};
-	}
+		uncopyable& operator=(const uncopyable& other) = delete;
+		uncopyable& operator=(uncopyable&& other) = delete;
+	};
 }

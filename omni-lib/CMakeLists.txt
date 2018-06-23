@@ -4,6 +4,7 @@ set(src_precompiled
 	"src/precompiled/precompiled.h")
 
 set(src_utilities
+	"src/utilities/barrier.h"
 	"src/utilities/uncopyable.h")
 
 set(src_engine

@@ -1,8 +1,8 @@
 #pragma once
 #include <thread>
 #include "window.h"
-#include <atomic>
 #include "render_commands.h"
+#include <atomic>
 
 namespace omni {
 	class render_engine : public util::uncopyable {

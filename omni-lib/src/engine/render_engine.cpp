@@ -40,6 +40,7 @@ namespace omni {
 		
 
 		while (m_render_thread_active) {
+			m_process_list.visit(omni::command_runner());
 			std::this_thread::sleep_for(std::chrono::milliseconds(500));
 		}
 

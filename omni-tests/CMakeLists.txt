@@ -3,6 +3,9 @@ set(omni_tests "omni-tests")
 set(src_precompiled
 	"src/precompiled/precompiled.h")
 
+set(src_util
+	"src/util/barrier.cpp")
+
 set(src_engine
 	"src/engine/application.cpp"
 	"src/engine/render_engine.cpp"
@@ -11,12 +14,14 @@ set(src_engine
 
 set(all_files
     ${src_precompiled}
-	${src_engine})
+	${src_engine}
+	${src_util})
 
 add_executable(${omni_tests} ${all_files})
 
 source_group("src\\precompiled" FILES ${src_precompiled})
 source_group("src\\engine" FILES ${src_engine})
+source_group("src\\util" FILES ${src_util})
 
 target_include_directories(${omni_tests} PRIVATE "../")
 
